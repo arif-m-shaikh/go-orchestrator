@@ -1,0 +1,146 @@
+body {
+  font-family: sans-serif;
+}
+
+.job-table {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr 0.5fr;
+}
+
+.job-table > div {
+  padding: .5em
+}
+
+.job-table>div:nth-child(-n+5) {
+  background-color: mediumslateblue;
+  color:white;
+}
+
+.job-table>div:nth-child(8n+5), .job-table>div:nth-child(8n+6), .job-table>div:nth-child(8n+7), .job-table>div:nth-child(8n+8) {
+  background-color: whitesmoke
+}
+
+.task-table {
+  display: grid;
+  grid-template-columns: max-content auto;
+}
+
+.task-table > div {
+  padding: .5em
+}
+
+.task-table>div:nth-child(-n+2) {
+  background-color: mediumslateblue;
+  color:white;
+}
+
+.task-table>div:nth-child(4n+3), .task-table>div:nth-child(4n+4) {
+  background-color: whitesmoke
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+
+.button-container-job-page {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+
+.top-nav {
+  padding-left: 5em;
+  padding-right: 5em;
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+.job-container {
+  padding-left: 5em;
+  padding-right: 5em;
+}
+
+.job-info {
+  padding-left: 5em;
+  padding-right: 5em;
+  padding-bottom: 1em;
+  display: grid;
+  grid-template-columns: auto;
+  grid-gap: 1em;
+}
+
+.job-info-title {
+  font-size: 1.5em;
+}
+
+/* Default button style */
+button {
+  background-color: mediumslateblue;
+  border-radius: .2em;
+  color:white;
+  border-color:mediumslateblue;
+  border-style: none;
+  padding:.5em .75em;
+  white-space: nowrap;
+}
+
+/* Style when button is clicked */
+button.clicked {
+  transform: translateY(2px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+a {
+  color: mediumslateblue;
+}
+
+.node rect {
+  stroke: #333;
+  fill: #fff;
+}
+
+.edgePath path {
+  stroke: #333;
+  fill: #333;
+  stroke-width: 1.5px;
+}
+
+.graph {
+  border: 1px solid #ccc;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.graph-container {
+  padding-top: 2em;
+}
+
+.status-indicator {
+  height: 1em;
+  width: 1em;
+  border-radius: 50%;
+  border: 1px solid #676767;
+}
+
+.status-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em
+}
+
+.schedule-badge-active-true::after {
+  content: 'Active';
+  background-color: white;
+  color:mediumslateblue;
+  border: 1px solid mediumslateblue;
+  border-radius: 1em;
+  font-size: .75rem;
+  padding: 0.1em 0.75em;
+  margin-left: 1em;
+}
+
+.schedule-badge-active-false {
+}
