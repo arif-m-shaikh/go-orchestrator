@@ -11,27 +11,14 @@ func analyticsJob() *Job {
 		Schedule: "* * * * *",
 	}
 
-	//=============================================| Get the sensor data
-	j.Add(&Task{
-		Name: "GetData",
-		Operator: ApiContext{
-			Name:              "GetData",
-			HttpMethod:        http.MethodGet,
-			EnvVarInURL:       false,
-			ApiURL:            "http://localhost:9090/api/temperature",
-			EnvVarInHeader:    false,
-			Header:            nil,
-			EnvVarInBody:      false,
-			Body:              nil,
-			RequestSchema:     "",
-			BodyTransSpec:     "",
-			BodyTransFunc:     "",
-			ResponseSchema:    "",
-			EnvStoreTransSpec: "",
-		},
-	})
+	var logDataContext ApiContext
+	logDataContext.Init()
+	logDataContext.Name = "LogData"
+	logDataContext.HttpMethod = http.MethodGet
+	logDataContext.ApiURL = "http://localhost:9090/api/logdata"
 
-	specStr := `[{
+	//=============================================| Get the temparature data
+	specTemp := `[{
 		"operation": "shift",
 		"over": "$",
 		"spec": {
@@ -40,25 +27,84 @@ func analyticsJob() *Job {
 		}
 		}]`
 
+	var getTemperatureContext ApiContext
+	getTemperatureContext.Init()
+	getTemperatureContext.Name = "GetTemparature"
+	getTemperatureContext.HttpMethod = http.MethodGet
+	getTemperatureContext.ApiURL = "http://localhost:9090/api/temperature"
+	getTemperatureContext.ResponseTransSpec = specTemp
+
 	j.Add(&Task{
-		Name: "ProcessData",
-		Operator: ApiContext{
-			Name:              "ProcessData",
-			HttpMethod:        http.MethodPost,
-			EnvVarInURL:       false,
-			ApiURL:            "http://localhost:9090/api/temperature",
-			EnvVarInHeader:    false,
-			Header:            nil,
-			EnvVarInBody:      false,
-			Body:              nil,
-			RequestSchema:     "",
-			BodyTransSpec:     specStr,
-			BodyTransFunc:     "",
-			ResponseSchema:    "",
-			EnvStoreTransSpec: "",
-		},
+		Name:     "GetTemparature",
+		Operator: getTemperatureContext,
 	})
-	j.SetDownstream(j.Task("GetData"), j.Task("ProcessData"))
+
+	j.Add(&Task{
+		Name:     "LogData1",
+		Operator: logDataContext,
+	})
+
+	//=============================================| Get the humidity data
+	specHumidity := `[{
+		"operation": "shift",
+		"over": "$",
+		"spec": {
+			"humidity": "name",
+			"reading": "value"
+		}
+		}]`
+
+	var getHumidityContext ApiContext
+	getHumidityContext.Init()
+	getHumidityContext.Name = "GetHumidity"
+	getHumidityContext.HttpMethod = http.MethodGet
+	getHumidityContext.ApiURL = "http://localhost:9090/api/humidity"
+	getHumidityContext.ResponseTransSpec = specHumidity
+
+	j.Add(&Task{
+		Name:     "GetHumidity",
+		Operator: getHumidityContext,
+	})
+
+	j.Add(&Task{
+		Name:     "LogData2",
+		Operator: logDataContext,
+	})
+	//=============================================| Process the data
+	var processHVACContext ApiContext
+	processHVACContext.Init()
+	processHVACContext.Name = "ProcessHVAC"
+	processHVACContext.HttpMethod = http.MethodPost
+	processHVACContext.ApiURL = "http://localhost:9090/api/processhvac"
+
+	j.Add(&Task{
+		Name:        "ProcessHVAC",
+		Operator:    processHVACContext,
+		TriggerRule: "allSuccessful",
+	})
+
+	j.Add(&Task{
+		Name:     "LogData3",
+		Operator: logDataContext,
+	})
+	//=============================================| Process the data
+	var storeHVACContext ApiContext
+	storeHVACContext.Init()
+	storeHVACContext.Name = "StoreHVAC"
+	storeHVACContext.HttpMethod = http.MethodPost
+	storeHVACContext.ApiURL = "http://localhost:9090/api/storehvac"
+
+	j.Add(&Task{
+		Name:        "StoreHVAC",
+		Operator:    storeHVACContext,
+		TriggerRule: "allDone",
+	})
+	j.SetDownstream(j.Task("GetTemparature"), j.Task("LogData1"))
+	j.SetDownstream(j.Task("LogData1"), j.Task("ProcessHVAC"))
+	j.SetDownstream(j.Task("GetHumidity"), j.Task("LogData2"))
+	j.SetDownstream(j.Task("LogData2"), j.Task("ProcessHVAC"))
+	j.SetDownstream(j.Task("ProcessHVAC"), j.Task("LogData3"))
+	j.SetDownstream(j.Task("LogData3"), j.Task("StoreHVAC"))
 	return j
 }
 

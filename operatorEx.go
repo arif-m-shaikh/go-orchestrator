@@ -14,10 +14,30 @@ type ApiContext struct {
 	EnvVarInBody      bool
 	Body              []byte
 	RequestSchema     string
-	BodyTransSpec     string
-	BodyTransFunc     string
+	RequestTransSpec  string
+	RequestTransFunc  string
 	ResponseSchema    string
+	ResponseTransSpec string
+	ResponseTransFunc string
 	EnvStoreTransSpec string
+}
+
+func (apiContext *ApiContext) Init() {
+	apiContext.Name = ""
+	apiContext.HttpMethod = ""
+	apiContext.EnvVarInURL = false
+	apiContext.ApiURL = ""
+	apiContext.EnvVarInHeader = false
+	apiContext.Header = nil
+	apiContext.EnvVarInBody = false
+	apiContext.Body = nil
+	apiContext.RequestSchema = ""
+	apiContext.RequestTransSpec = ""
+	apiContext.RequestTransFunc = ""
+	apiContext.ResponseSchema = ""
+	apiContext.ResponseTransSpec = ""
+	apiContext.ResponseTransFunc = ""
+	apiContext.EnvStoreTransSpec = ""
 }
 
 func (apiContext ApiContext) Run() ([]byte, error) {
@@ -44,7 +64,7 @@ func (apiContext ApiContext) Run() ([]byte, error) {
 		}
 	}
 
-	//-------------------------| Replace in Body
+	//-------------------------| Replace in Request
 	body := apiContext.Body
 	if body != nil {
 		if apiContext.EnvVarInBody {
@@ -55,15 +75,15 @@ func (apiContext ApiContext) Run() ([]byte, error) {
 			}
 		}
 
-		if apiContext.BodyTransSpec != "" {
-			body, err = transformData(apiContext.BodyTransSpec, body)
+		if apiContext.RequestTransSpec != "" {
+			body, err = transformData(apiContext.RequestTransSpec, body)
 			if err != nil {
 				log.Fatal(err)
 				return nil, err
 			}
-		} else if apiContext.BodyTransFunc != "" {
+		} else if apiContext.RequestTransFunc != "" {
 			body, err = transformDataUsingCode(apiContext.Name,
-				apiContext.BodyTransFunc,
+				apiContext.RequestTransFunc,
 				body)
 			if err != nil {
 				log.Fatal(err)
@@ -81,11 +101,30 @@ func (apiContext ApiContext) Run() ([]byte, error) {
 		log.Fatal(err)
 	}
 
-	if apiContext.EnvStoreTransSpec != "" {
-		err := storeVarInJson(apiContext, resData)
-		if err != nil {
-			log.Fatal(err)
-			return nil, err
+	//-------------------------| Replace in Response
+	if resData != nil {
+		if apiContext.EnvStoreTransSpec != "" {
+			err := storeVarInJson(apiContext, resData)
+			if err != nil {
+				log.Fatal(err)
+				return nil, err
+			}
+		}
+
+		if apiContext.ResponseTransSpec != "" {
+			resData, err = transformData(apiContext.ResponseTransSpec, resData)
+			if err != nil {
+				log.Fatal(err)
+				return nil, err
+			}
+		} else if apiContext.ResponseTransFunc != "" {
+			resData, err = transformDataUsingCode(apiContext.Name,
+				apiContext.ResponseTransFunc,
+				resData)
+			if err != nil {
+				log.Fatal(err)
+				return nil, err
+			}
 		}
 	}
 

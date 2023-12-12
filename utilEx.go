@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -146,7 +145,7 @@ func httpCall(httpMethod,
 		for k, v := range mapHeader {
 			req.Header.Set(k, v)
 		}
-		fmt.Println(req.Header)
+		//fmt.Println(req.Header)
 	}
 
 	//====================| Make the API call
