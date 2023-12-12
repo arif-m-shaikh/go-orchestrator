@@ -20,7 +20,7 @@ type Task struct {
 	Retries           int
 	RetryDelay        RetryDelay
 	attemptsRemaining int
-	ParentData        [][]byte
+	ParentData        []byte
 	Data              []byte
 }
 
@@ -34,13 +34,12 @@ const (
 func (t *Task) run(writes chan writeOp) error {
 	log.Printf("starting task <%v>", t.Name)
 
-	isApiContext := false
 	taskTypeStr := reflect.TypeOf(t.Operator).String()
 	strList := strings.Split(taskTypeStr, ".")
-	if strList[1] == "ApiContext" && t.ParentData != nil {
-		isApiContext = true
+	isApiContext := (strList[1] == "ApiContext")
+	if isApiContext && t.ParentData != nil {
 		ApiContextOperator := t.Operator.(ApiContext)
-		ApiContextOperator.Body = t.ParentData[0]
+		ApiContextOperator.Body = t.ParentData
 		t.Operator = ApiContextOperator
 	}
 

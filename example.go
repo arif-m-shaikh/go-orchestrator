@@ -58,6 +58,7 @@ func analyticsJob() *Job {
 			EnvStoreTransSpec: "",
 		},
 	})
+	j.SetDownstream(j.Task("GetData"), j.Task("ProcessData"))
 	return j
 }
 
@@ -69,7 +70,7 @@ func complexAnalyticsJob() *Job {
 	}
 
 	j.Add(&Task{
-		Name:     "Create a NumPy array",
+		Name:     "sleepOne",
 		Operator: Command{Cmd: "sleep", Args: []string{"1"}},
 	})
 	j.Add(&Task{

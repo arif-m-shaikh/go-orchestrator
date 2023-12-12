@@ -121,14 +121,14 @@ func (j *Job) run() error {
 			}
 
 			// If dependencies are done, start the dependent tasks
-			hierarchyData := make([][]byte, 10)
+			var hierarchyData []byte
 			if v == none && j.Dag.isDownstream(t) {
 				upstreamDone := true
 				upstreamSuccessful := true
 				for _, us := range j.Dag.dependencies(t) {
 					parentTask := j.Tasks[us]
 					taskData := parentTask.Data
-					hierarchyData = append(hierarchyData, taskData)
+					hierarchyData = taskData
 
 					w, _ := taskState.Load(us)
 					if w == none || w == running || w == upForRetry {
